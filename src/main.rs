@@ -2,8 +2,7 @@ use cursive::{
     Cursive,
     event::Key,
     views::{
-        Checkbox, CircularFocus, Dialog, DummyView, LinearLayout, PaddedView, RadioGroup,
-        ScrollView, TextView,
+        Checkbox, Dialog, DummyView, LinearLayout, PaddedView, RadioGroup, ScrollView, TextView,
     },
 };
 use mitsein::vec1::{Vec1, vec1};
@@ -106,18 +105,16 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
             }
         }
         siv.add_layer(
-            Dialog::around(ScrollView::new(
-                CircularFocus::new(layout).wrap_up_down().wrap_tab(),
-            ))
-            .button("OK", {
-                move |s| {
-                    s.with_user_data(|st: &mut State<T>| {
-                        st.ok = true;
-                    });
-                    s.quit();
-                }
-            })
-            .button("Cancel", Cursive::quit),
+            Dialog::around(ScrollView::new(layout))
+                .button("OK", {
+                    move |s| {
+                        s.with_user_data(|st: &mut State<T>| {
+                            st.ok = true;
+                        });
+                        s.quit();
+                    }
+                })
+                .button("Cancel", Cursive::quit),
         );
         siv.run();
         match siv.take_user_data() {
