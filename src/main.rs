@@ -1,8 +1,7 @@
 use cursive::{
     Cursive, View,
-    direction::Direction,
     event::{EventResult, Key},
-    view::{Finder, Nameable},
+    view::Nameable,
     views::{
         Checkbox, Dialog, DialogFocus, DummyView, LinearLayout, OnEventView, PaddedView,
         RadioGroup, ScrollView, TextView,
@@ -81,14 +80,13 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                         if i == *default {
                             let _ = button.select();
                         }
-                        sublayout.add_child(button);
+                        if si == 0 && i == 0 {
+                            sublayout.add_child(button.with_name("top"));
+                        } else {
+                            sublayout.add_child(button);
+                        }
                     }
-                    let padded = PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout);
-                    if si == 0 {
-                        layout.add_child(padded.with_name("top"));
-                    } else {
-                        layout.add_child(padded);
-                    }
+                    layout.add_child(PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout));
                 }
                 Selector::Multi { title, options } => {
                     layout.add_child(TextView::new(title));
@@ -126,12 +124,7 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                             );
                         }
                     }
-                    let padded = PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout);
-                    if si == 0 {
-                        layout.add_child(padded.with_name("top"));
-                    } else {
-                        layout.add_child(padded);
-                    }
+                    layout.add_child(PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout));
                 }
             }
         }
@@ -150,16 +143,21 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
             )
             .on_pre_event_inner(Key::Home, |dialog, _| {
                 dialog.set_focus(DialogFocus::Content);
-                let scroller = dialog
+                if let Some(scroller) = dialog
                     .get_content_mut()
                     .as_any_mut()
                     .downcast_mut::<ScrollView<LinearLayout>>()
-                    .expect("dialog content should be ScrollView");
-                scroller.scroll_to_top();
-                dialog.call_on_name("top", |b: &mut PaddedView<LinearLayout>| {
-                    b.take_focus(Direction::up())
-                });
-                Some(EventResult::Consumed(None))
+                {
+                    scroller.scroll_to_top();
+                }
+                let cb = if let Ok(EventResult::Consumed(val)) =
+                    dialog.focus_view(&cursive::view::Selector::Name("top"))
+                {
+                    val
+                } else {
+                    None
+                };
+                Some(EventResult::Consumed(cb))
             })
             .on_pre_event_inner(Key::End, |dialog, _| {
                 dialog.set_focus(DialogFocus::Button(0));

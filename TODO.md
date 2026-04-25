@@ -1,6 +1,5 @@
 - Keybindings to add:
     - These currently move the scrollbar but don't change the focus:
-        - `g`, `Home` — jump to top
         - `w`, `Page Up` — go up a page
         - `z`, `Page Down` — go down a page
     - `Tab` — go to next selection list
