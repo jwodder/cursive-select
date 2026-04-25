@@ -1,4 +1,3 @@
-#![expect(clippy::unwrap_used)]
 use cursive::{
     Cursive,
     event::Key,
@@ -61,8 +60,9 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                     layout.add_child(TextView::new(title));
                     let mut group = RadioGroup::<usize>::new().on_change({
                         move |s, &radioed| {
-                            s.user_data::<State<T>>().unwrap().outcome[si].1 =
-                                Selection::Single(radioed);
+                            s.with_user_data(|st: &mut State<T>| {
+                                st.outcome[si].1 = Selection::Single(radioed);
+                            });
                         }
                     });
                     let mut sublayout = LinearLayout::vertical();
@@ -81,16 +81,17 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                     for (i, opt) in options.iter().enumerate() {
                         let chkbox = Checkbox::new().on_change({
                             move |s, checked| {
-                                let Selection::Multi(ref mut selection) =
-                                    s.user_data::<State<T>>().unwrap().outcome[si].1
-                                else {
-                                    unreachable!();
-                                };
-                                if checked {
-                                    selection.insert(i);
-                                } else {
-                                    selection.remove(&i);
-                                }
+                                s.with_user_data(|st: &mut State<T>| {
+                                    let Selection::Multi(ref mut selection) = st.outcome[si].1
+                                    else {
+                                        unreachable!();
+                                    };
+                                    if checked {
+                                        selection.insert(i);
+                                    } else {
+                                        selection.remove(&i);
+                                    }
+                                });
                             }
                         });
                         let lbl = TextView::new(opt);
@@ -110,16 +111,19 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
             ))
             .button("OK", {
                 move |s| {
-                    s.user_data::<State<T>>().unwrap().ok = true;
+                    s.with_user_data(|st: &mut State<T>| {
+                        st.ok = true;
+                    });
                     s.quit();
                 }
             })
             .button("Cancel", Cursive::quit),
         );
         siv.run();
-        match siv.take_user_data().unwrap() {
-            State { ok: true, outcome } => Some(outcome),
-            State { ok: false, .. } => None,
+        match siv.take_user_data() {
+            Some(State { ok: true, outcome }) => Some(outcome),
+            Some(State { ok: false, .. }) => None,
+            None => panic!("Could not get user data back"),
         }
     }
 }
