@@ -1,9 +1,15 @@
+#![expect(clippy::unwrap_used)]
 use cursive::{
     Cursive,
     event::Key,
-    views::{Checkbox, CircularFocus, LinearLayout, PaddedView, RadioGroup, TextView},
+    views::{Button, Checkbox, CircularFocus, LinearLayout, PaddedView, RadioGroup, TextView},
 };
 use mitsein::vec1::{Vec1, vec1};
+use std::collections::BTreeSet;
+use std::sync::{
+    Arc, Mutex,
+    atomic::{AtomicBool, Ordering::SeqCst},
+};
 
 const OPTION_INDENT: usize = 4;
 
@@ -12,7 +18,7 @@ struct Curselect<T> {
     selectors: Vec<(T, Selector)>,
 }
 
-impl<T> Curselect<T> {
+impl<T: Clone + Send + Sync + 'static> Curselect<T> {
     fn new() -> Self {
         Curselect {
             selectors: Vec::new(),
@@ -24,17 +30,23 @@ impl<T> Curselect<T> {
     }
 
     fn run(self) -> Option<Vec<(T, Selection)>> {
-        if self.selectors.is_empty() {
-            return Some(Vec::new());
-            // Or return None?
-            // Or show a screen with just "OK" and "Cancel" buttons?
+        let mut outcome = Vec::with_capacity(self.selectors.len());
+        let mut selectors = Vec::with_capacity(self.selectors.len());
+        for (key, s) in self.selectors {
+            let keyout = match &s {
+                Selector::Single { default, .. } => Selection::Single(*default),
+                Selector::Multi { .. } => Selection::Multi(BTreeSet::new()),
+            };
+            outcome.push((key, keyout));
+            selectors.push(s);
         }
+        let outcome = Arc::new(Mutex::new(outcome));
         let mut siv = cursive::default();
         siv.add_global_callback('q', Cursive::quit);
         siv.add_global_callback('Q', Cursive::quit);
         siv.add_global_callback(Key::Esc, Cursive::quit);
         let mut layout = LinearLayout::vertical();
-        for (_, sel) in &self.selectors {
+        for (si, sel) in selectors.iter().enumerate() {
             match sel {
                 Selector::Single {
                     title,
@@ -56,8 +68,21 @@ impl<T> Curselect<T> {
                 Selector::Multi { title, options } => {
                     layout.add_child(TextView::new(title));
                     let mut sublayout = LinearLayout::vertical();
-                    for opt in options {
-                        let chkbox = Checkbox::new();
+                    for (i, opt) in options.iter().enumerate() {
+                        let chkbox = Checkbox::new().on_change({
+                            let outcome = Arc::clone(&outcome);
+                            move |_, checked| {
+                                let mut oc = outcome.lock().unwrap();
+                                let Selection::Multi(ref mut selection) = oc[si].1 else {
+                                    unreachable!();
+                                };
+                                if checked {
+                                    selection.insert(i);
+                                } else {
+                                    selection.remove(&i);
+                                }
+                            }
+                        });
                         let lbl = TextView::new(format!(" {opt}"));
                         let row = LinearLayout::horizontal().child(chkbox).child(lbl);
                         sublayout.add_child(row);
@@ -66,9 +91,23 @@ impl<T> Curselect<T> {
                 }
             }
         }
+        let ok = Arc::new(AtomicBool::new(false));
+        let ok_button = Button::new("OK", {
+            let ok = Arc::clone(&ok);
+            move |s| {
+                ok.store(true, SeqCst);
+                s.quit();
+            }
+        });
+        let cancel_button = Button::new("Cancel", Cursive::quit);
+        layout.add_child(
+            LinearLayout::horizontal()
+                .child(ok_button)
+                .child(cancel_button),
+        );
         siv.add_layer(CircularFocus::new(layout).wrap_up_down().wrap_tab());
         siv.run();
-        None // TODO: Return selections
+        ok.load(SeqCst).then(|| outcome.lock().unwrap().clone())
     }
 }
 
@@ -88,7 +127,7 @@ enum Selector {
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum Selection {
     Single(usize),
-    Multi(Vec<usize>),
+    Multi(BTreeSet<usize>),
 }
 
 fn main() {

@@ -1,10 +1,7 @@
-- Basics:
-    - Add "OK" and "Cancel" options
-        - Wrap everything in a Dialog?
-    - Return selected options when user hits "OK"
-
 - Test out scrolling and ensure it works
 - Insert blank line between selection lists
+- Improve spacing around buttons
+- Better handling of calling `run()` with no selection lists?
 - Keybindings to add:
     - `g` — jump to top
     - `G` — jump to bottom
@@ -19,6 +16,7 @@
   payload type to `Option<usize>`
 - Stylize selection list titles?
 - Allow setting a list/set of defaults for multi-selections
+- Test wrapping of long text
 
 - After next release of `cursive` after v0.21.1:
     - Use `Checkbox::labelled()`
