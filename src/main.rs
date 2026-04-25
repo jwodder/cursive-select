@@ -92,8 +92,11 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                                 }
                             }
                         });
-                        let lbl = TextView::new(format!(" {opt}"));
-                        let row = LinearLayout::horizontal().child(chkbox).child(lbl);
+                        let lbl = TextView::new(opt);
+                        let row = LinearLayout::horizontal()
+                            .child(chkbox)
+                            .child(DummyView)
+                            .child(lbl);
                         sublayout.add_child(row);
                     }
                     layout.add_child(PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout));
@@ -115,8 +118,12 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                 .child(ok_button)
                 .child(cancel_button),
         );
-        siv.add_layer(ScrollView::new(
-            CircularFocus::new(layout).wrap_up_down().wrap_tab(),
+        siv.add_layer(PaddedView::lrtb(
+            1,
+            1,
+            0,
+            0,
+            ScrollView::new(CircularFocus::new(layout).wrap_up_down().wrap_tab()),
         ));
         siv.run();
         ok.load(SeqCst).then(|| outcome.lock().unwrap().clone())

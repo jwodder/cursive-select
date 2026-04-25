@@ -9,7 +9,6 @@
     - `Tab` — go to next selection list
     - `Shift`+`Tab` — go to previous selection list
 - Stylize selection list titles?
-- Add a cell of padding around the view area?
 
 - `Selector::Single`: Handle `default` being out of range for `options`?
 - Allow setting a list/set of defaults for multi-selections
@@ -22,6 +21,9 @@
 - Problem: Long single-selection lines are cut off, while long multi-selection
   lines are wrapped
     - Report as bug?
+- Inconsistency: When a single-selection option has the focus, the entire line
+  is highlighted, but when a multi-selection option has the focus, only the
+  checkbox is highlighted.
 
 - After next release of `cursive` after v0.21.1:
     - Use `Checkbox::labelled()`
