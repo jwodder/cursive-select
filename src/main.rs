@@ -1,6 +1,6 @@
 use cursive::{
     Cursive,
-    event::Key,
+    event::{EventResult, Key},
     views::{
         Checkbox, Dialog, DialogFocus, DummyView, LinearLayout, OnEventView, PaddedView,
         RadioGroup, ScrollView, TextView,
@@ -128,7 +128,7 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
             )
             .on_pre_event_inner(Key::End, |dialog, _| {
                 dialog.set_focus(DialogFocus::Button(0));
-                None
+                Some(EventResult::Consumed(None))
             }),
         );
         siv.run();
