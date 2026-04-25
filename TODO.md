@@ -1,4 +1,3 @@
-- Improve spacing around buttons
 - Keybindings to add:
     - `g` — jump to top
     - `G` — jump to bottom

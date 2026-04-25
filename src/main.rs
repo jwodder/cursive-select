@@ -3,7 +3,7 @@ use cursive::{
     Cursive,
     event::Key,
     views::{
-        Button, Checkbox, CircularFocus, DummyView, LinearLayout, PaddedView, RadioGroup,
+        Checkbox, CircularFocus, Dialog, DummyView, LinearLayout, PaddedView, RadioGroup,
         ScrollView, TextView,
     },
 };
@@ -50,6 +50,9 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
         siv.add_global_callback(Key::Esc, Cursive::quit);
         let mut layout = LinearLayout::vertical();
         for (si, sel) in selectors.iter().enumerate() {
+            if si > 0 {
+                layout.add_child(DummyView);
+            }
             match sel {
                 Selector::Single {
                     title,
@@ -102,29 +105,21 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                     layout.add_child(PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout));
                 }
             }
-            layout.add_child(DummyView);
         }
         let ok = Arc::new(AtomicBool::new(false));
-        let ok_button = Button::new("OK", {
-            let ok = Arc::clone(&ok);
-            move |s| {
-                ok.store(true, SeqCst);
-                s.quit();
-            }
-        });
-        let cancel_button = Button::new("Cancel", Cursive::quit);
-        layout.add_child(
-            LinearLayout::horizontal()
-                .child(ok_button)
-                .child(cancel_button),
+        siv.add_layer(
+            Dialog::around(ScrollView::new(
+                CircularFocus::new(layout).wrap_up_down().wrap_tab(),
+            ))
+            .button("OK", {
+                let ok = Arc::clone(&ok);
+                move |s| {
+                    ok.store(true, SeqCst);
+                    s.quit();
+                }
+            })
+            .button("Cancel", Cursive::quit),
         );
-        siv.add_layer(PaddedView::lrtb(
-            1,
-            1,
-            0,
-            0,
-            ScrollView::new(CircularFocus::new(layout).wrap_up_down().wrap_tab()),
-        ));
         siv.run();
         ok.load(SeqCst).then(|| outcome.lock().unwrap().clone())
     }
