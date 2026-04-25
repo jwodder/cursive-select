@@ -1,7 +1,7 @@
 use cursive::{
     Cursive,
     event::Key,
-    views::{Checkbox, LinearLayout, PaddedView, RadioGroup, TextView},
+    views::{Checkbox, CircularFocus, LinearLayout, PaddedView, RadioGroup, TextView},
 };
 use mitsein::vec1::{Vec1, vec1};
 
@@ -66,7 +66,7 @@ impl<T> Curselect<T> {
                 }
             }
         }
-        siv.add_layer(layout);
+        siv.add_layer(CircularFocus::new(layout).wrap_up_down().wrap_tab());
         siv.run();
         None // TODO: Return selections
     }
