@@ -45,6 +45,9 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
         }
         let outcome = Arc::new(Mutex::new(outcome));
         let mut siv = cursive::default();
+        siv.with_theme(|theme| {
+            theme.shadow = false;
+        });
         siv.add_global_callback('q', Cursive::quit);
         siv.add_global_callback('Q', Cursive::quit);
         siv.add_global_callback(Key::Esc, Cursive::quit);

@@ -12,7 +12,6 @@
 - `Selector::Single`: Handle `default` being out of range for `options`?
 - Allow setting a list/set of defaults for multi-selections
 - Better handling of calling `run()` with no selection lists?
-- Get rid of the shadow on the view?
 
 - Slight problem with scrolling: If you scroll to the bottom and then wrap
   around to the top, the first focusable item will be on top of the screen,
