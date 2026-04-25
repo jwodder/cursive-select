@@ -1,10 +1,9 @@
 - Keybindings to add:
-    - `g` — jump to top
-    - `G` — jump to bottom
-    - `j` — move down, wrapping around ?
-    - `k` — move up, wrapping around ?
-    - `w` — go up a page
-    - `z` — go down a page
+    - These currently move the scrollbar but don't change the focus:
+        - `g`, `Home` — jump to top
+        - `G`, `End` — jump to bottom
+        - `w`, `Page Up` — go up a page
+        - `z`, `Page Down` — go down a page
     - `Tab` — go to next selection list
     - `Shift`+`Tab` — go to previous selection list
 - Stylize selection list titles?

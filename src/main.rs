@@ -45,6 +45,14 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
         siv.add_global_callback('q', Cursive::quit);
         siv.add_global_callback('Q', Cursive::quit);
         siv.add_global_callback(Key::Esc, Cursive::quit);
+        siv.add_global_callback('h', |s| s.on_event(Key::Left.into()));
+        siv.add_global_callback('j', |s| s.on_event(Key::Down.into()));
+        siv.add_global_callback('k', |s| s.on_event(Key::Up.into()));
+        siv.add_global_callback('l', |s| s.on_event(Key::Right.into()));
+        siv.add_global_callback('w', |s| s.on_event(Key::PageUp.into()));
+        siv.add_global_callback('z', |s| s.on_event(Key::PageDown.into()));
+        siv.add_global_callback('g', |s| s.on_event(Key::Home.into()));
+        siv.add_global_callback('G', |s| s.on_event(Key::End.into()));
         let mut layout = LinearLayout::vertical();
         for (si, sel) in selectors.iter().enumerate() {
             if si > 0 {
