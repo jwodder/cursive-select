@@ -5,7 +5,7 @@ use cursive::{
     view::{Finder, Nameable},
     views::{
         Checkbox, Dialog, DialogFocus, DummyView, LinearLayout, OnEventView, PaddedView,
-        RadioButton, RadioGroup, ScrollView, TextView,
+        RadioGroup, ScrollView, TextView,
     },
 };
 use mitsein::vec1::{Vec1, vec1};
@@ -81,13 +81,14 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                         if i == *default {
                             let _ = button.select();
                         }
-                        if si == 0 && i == 0 {
-                            sublayout.add_child(button.with_name("top"));
-                        } else {
-                            sublayout.add_child(button);
-                        }
+                        sublayout.add_child(button);
                     }
-                    layout.add_child(PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout));
+                    let padded = PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout);
+                    if si == 0 {
+                        layout.add_child(padded.with_name("top"));
+                    } else {
+                        layout.add_child(padded);
+                    }
                 }
                 Selector::Multi { title, options } => {
                     layout.add_child(TextView::new(title));
@@ -109,13 +110,28 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                             }
                         });
                         let lbl = TextView::new(opt);
-                        let row = LinearLayout::horizontal()
-                            .child(chkbox)
-                            .child(DummyView)
-                            .child(lbl);
-                        sublayout.add_child(row);
+                        if si == 0 && i == 0 {
+                            sublayout.add_child(
+                                LinearLayout::horizontal()
+                                    .child(chkbox.with_name("top"))
+                                    .child(DummyView)
+                                    .child(lbl),
+                            );
+                        } else {
+                            sublayout.add_child(
+                                LinearLayout::horizontal()
+                                    .child(chkbox)
+                                    .child(DummyView)
+                                    .child(lbl),
+                            );
+                        }
                     }
-                    layout.add_child(PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout));
+                    let padded = PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout);
+                    if si == 0 {
+                        layout.add_child(padded.with_name("top"));
+                    } else {
+                        layout.add_child(padded);
+                    }
                 }
             }
         }
@@ -140,18 +156,10 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                     .downcast_mut::<ScrollView<LinearLayout>>()
                     .expect("dialog content should be ScrollView");
                 scroller.scroll_to_top();
-                let layout = scroller.get_inner_mut();
-                layout.call_on_name("top", |b: &mut RadioButton<usize>| {
-                    b.take_focus(Direction::none())
+                dialog.call_on_name("top", |b: &mut PaddedView<LinearLayout>| {
+                    b.take_focus(Direction::up())
                 });
-                /*
-                for i in 0..(layout.len()) {
-                    if layout.set_focus_index(i).is_ok() {
-                        break;
-                    }
-                }
-                */
-                None
+                Some(EventResult::Consumed(None))
             })
             .on_pre_event_inner(Key::End, |dialog, _| {
                 dialog.set_focus(DialogFocus::Button(0));
