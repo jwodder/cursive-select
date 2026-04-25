@@ -9,6 +9,9 @@
     - `Shift`+`Tab` — go to previous selection list
 - Stylize selection list titles?
 
+- Problem: Now that the program uses a Dialog, "OK" can only be selected via
+  mouse
+
 - `Selector::Single`: Handle `default` being out of range for `options`?
 - Allow setting a list/set of defaults for multi-selections
 - Better handling of calling `run()` with no selection lists?

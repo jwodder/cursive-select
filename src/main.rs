@@ -9,10 +9,6 @@ use cursive::{
 };
 use mitsein::vec1::{Vec1, vec1};
 use std::collections::BTreeSet;
-use std::sync::{
-    Arc, Mutex,
-    atomic::{AtomicBool, Ordering::SeqCst},
-};
 
 const OPTION_INDENT: usize = 4;
 
@@ -43,8 +39,8 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
             outcome.push((key, keyout));
             selectors.push(s);
         }
-        let outcome = Arc::new(Mutex::new(outcome));
         let mut siv = cursive::default();
+        siv.set_user_data(State { outcome, ok: false });
         siv.with_theme(|theme| {
             theme.shadow = false;
         });
@@ -64,10 +60,9 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                 } => {
                     layout.add_child(TextView::new(title));
                     let mut group = RadioGroup::<usize>::new().on_change({
-                        let outcome = Arc::clone(&outcome);
-                        move |_, &radioed| {
-                            let mut oc = outcome.lock().unwrap();
-                            oc[si].1 = Selection::Single(radioed);
+                        move |s, &radioed| {
+                            s.user_data::<State<T>>().unwrap().outcome[si].1 =
+                                Selection::Single(radioed);
                         }
                     });
                     let mut sublayout = LinearLayout::vertical();
@@ -85,10 +80,10 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                     let mut sublayout = LinearLayout::vertical();
                     for (i, opt) in options.iter().enumerate() {
                         let chkbox = Checkbox::new().on_change({
-                            let outcome = Arc::clone(&outcome);
-                            move |_, checked| {
-                                let mut oc = outcome.lock().unwrap();
-                                let Selection::Multi(ref mut selection) = oc[si].1 else {
+                            move |s, checked| {
+                                let Selection::Multi(ref mut selection) =
+                                    s.user_data::<State<T>>().unwrap().outcome[si].1
+                                else {
                                     unreachable!();
                                 };
                                 if checked {
@@ -109,23 +104,30 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                 }
             }
         }
-        let ok = Arc::new(AtomicBool::new(false));
         siv.add_layer(
             Dialog::around(ScrollView::new(
                 CircularFocus::new(layout).wrap_up_down().wrap_tab(),
             ))
             .button("OK", {
-                let ok = Arc::clone(&ok);
                 move |s| {
-                    ok.store(true, SeqCst);
+                    s.user_data::<State<T>>().unwrap().ok = true;
                     s.quit();
                 }
             })
             .button("Cancel", Cursive::quit),
         );
         siv.run();
-        ok.load(SeqCst).then(|| outcome.lock().unwrap().clone())
+        match siv.take_user_data().unwrap() {
+            State { ok: true, outcome } => Some(outcome),
+            State { ok: false, .. } => None,
+        }
     }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct State<T> {
+    outcome: Vec<(T, Selection)>,
+    ok: bool,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
