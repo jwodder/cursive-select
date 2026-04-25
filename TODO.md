@@ -1,0 +1,26 @@
+- Basics:
+    - Add "OK" and "Cancel" options
+        - Wrap everything in a Dialog?
+    - Return selected options when user hits "OK"
+
+- Test out scrolling and ensure it works
+- Insert blank line between selection lists
+- Keybindings to add:
+    - `g` — jump to top
+    - `G` — jump to bottom
+    - `j` — move down, wrapping around?
+    - `k` — move up, wrapping around?
+    - `w` — go up a page
+    - `z` — go down a page
+    - `Tab` — go to next selection list
+    - `Shift`+`Tab` — go to previous selection list
+- `Selector::Single`: Handle `default` being out of range for `options`?
+- Make `Selector::Single {default}` optional, and change `Selection::Single`'s
+  payload type to `Option<usize>`
+- Stylize selection list titles?
+- Allow setting a list/set of defaults for multi-selections
+
+- After next release of `cursive` after v0.21.1:
+    - Use `Checkbox::labelled()`
+    - Use `MultiChoiceGroup`?
+        - cf. <https://github.com/gyscos/cursive/blob/main/cursive/examples/checkbox_multichoicegroup.rs>
