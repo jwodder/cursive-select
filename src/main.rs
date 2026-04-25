@@ -2,7 +2,9 @@
 use cursive::{
     Cursive,
     event::Key,
-    views::{Button, Checkbox, CircularFocus, LinearLayout, PaddedView, RadioGroup, TextView},
+    views::{
+        Button, Checkbox, CircularFocus, DummyView, LinearLayout, PaddedView, RadioGroup, TextView,
+    },
 };
 use mitsein::vec1::{Vec1, vec1};
 use std::collections::BTreeSet;
@@ -90,6 +92,7 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                     layout.add_child(PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout));
                 }
             }
+            layout.add_child(DummyView);
         }
         let ok = Arc::new(AtomicBool::new(false));
         let ok_button = Button::new("OK", {
