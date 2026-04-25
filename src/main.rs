@@ -56,7 +56,13 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                     default,
                 } => {
                     layout.add_child(TextView::new(title));
-                    let mut group = RadioGroup::new();
+                    let mut group = RadioGroup::<usize>::new().on_change({
+                        let outcome = Arc::clone(&outcome);
+                        move |_, &radioed| {
+                            let mut oc = outcome.lock().unwrap();
+                            oc[si].1 = Selection::Single(radioed);
+                        }
+                    });
                     let mut sublayout = LinearLayout::vertical();
                     for (i, opt) in options.iter().enumerate() {
                         let mut button = group.button(i, opt);
