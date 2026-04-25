@@ -1,4 +1,3 @@
-- Test out scrolling and ensure it works
 - Improve spacing around buttons
 - Test wrapping of long text
 
@@ -19,6 +18,10 @@
 - Allow setting a list/set of defaults for multi-selections
 - Better handling of calling `run()` with no selection lists?
 - Get rid of the shadow on the view?
+
+- Slight problem with scrolling: If you scroll to the bottom and then wrap
+  around to the top, the first focusable item will be on top of the screen,
+  cutting off the text for the first selection list.
 
 - After next release of `cursive` after v0.21.1:
     - Use `Checkbox::labelled()`

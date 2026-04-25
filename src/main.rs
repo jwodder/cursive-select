@@ -3,7 +3,8 @@ use cursive::{
     Cursive,
     event::Key,
     views::{
-        Button, Checkbox, CircularFocus, DummyView, LinearLayout, PaddedView, RadioGroup, TextView,
+        Button, Checkbox, CircularFocus, DummyView, LinearLayout, PaddedView, RadioGroup,
+        ScrollView, TextView,
     },
 };
 use mitsein::vec1::{Vec1, vec1};
@@ -114,7 +115,9 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                 .child(ok_button)
                 .child(cancel_button),
         );
-        siv.add_layer(CircularFocus::new(layout).wrap_up_down().wrap_tab());
+        siv.add_layer(ScrollView::new(
+            CircularFocus::new(layout).wrap_up_down().wrap_tab(),
+        ));
         siv.run();
         ok.load(SeqCst).then(|| outcome.lock().unwrap().clone())
     }
