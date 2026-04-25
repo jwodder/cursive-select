@@ -13,12 +13,12 @@
     - `Shift`+`Tab` — go to previous selection list
 
 - Stylize selection list titles?
+- Add a cell of padding around the view area?
 - `Selector::Single`: Handle `default` being out of range for `options`?
 
-- Make `Selector::Single {default}` optional, and change `Selection::Single`'s
-  payload type to `Option<usize>`
 - Allow setting a list/set of defaults for multi-selections
 - Better handling of calling `run()` with no selection lists?
+- Get rid of the shadow on the view?
 
 - After next release of `cursive` after v0.21.1:
     - Use `Checkbox::labelled()`

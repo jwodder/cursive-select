@@ -141,35 +141,91 @@ enum Selection {
 
 fn main() {
     let mut app = Curselect::new();
-    app.add(
-        "flavor",
-        Selector::Single {
-            title: "Flavors:".to_owned(),
-            options: vec1![
-                "Vanilla".to_owned(),
-                "Chocolate".to_owned(),
-                "Strawberry".to_owned(),
-                "Cinnamon".to_owned(),
-                "Butterscotch".to_owned(),
-                "Peanut Butter Fudge".to_owned(),
-                "Chili".to_owned(),
-            ],
-            default: 0,
-        },
-    );
-    app.add(
-        "toppings",
-        Selector::Multi {
-            title: "Toppings:".to_owned(),
-            options: vec1![
-                "Whipped Cream".to_owned(),
-                "Hot Fudge".to_owned(),
-                "Nuts".to_owned(),
-                "Cherry".to_owned(),
-                "Banana".to_owned(),
-            ],
-        },
-    );
+    let arg = std::env::args_os().nth(1);
+    let arg = arg.as_ref();
+    if arg.is_some_and(|s| s == "full") {
+        app.add(
+            "word",
+            Selector::Single {
+                title: "Code Word:".into(),
+                options: vec1![
+                    "Abacus".into(),
+                    "Banana".into(),
+                    "Coconut".into()
+                    "Delta".into(),
+                    "Exotic".into(),
+                    "Finagle".into(),
+                    "Geranium".into(),
+                    "Heliopause".into(),
+                    "Indigo".into(),
+                    "Justice".into(),
+                    "Kangaroo".into(),
+                    "Lemon".into(),
+                    "Mausoleum".into(),
+                    "Nocturnal".into(),
+                    "Occupation".into(),
+                    "Philosophy".into(),
+                    "Quux".into(),
+                    "Radius".into(),
+                    "Service".into(),
+                    "Tuxedo".into(),
+                    "Universe".into(),
+                    "Vulpine".into(),
+                    "Wolpertinger".into(),
+                    "Xylem".into(),
+                    "Yellow".into(),
+                    "Zyzzyva".into(),
+                ],
+                default: 0,
+            },
+        );
+        app.add(
+            "number",
+            Selector::Single {
+                title: "Code Number:".into(),
+                options: vec1![
+                    "Zero (0)".into(),
+                    "One (1)".into(),
+                    "Two (2)".into(),
+                    "Three (3)".into(),
+                    "Four (4)".into(),
+                    "Five (5)".into(),
+                ],
+                default: 5,
+            },
+        );
+    } else if arg.is_some_and(|s| s == "empty") {
+    } else {
+        app.add(
+            "flavor",
+            Selector::Single {
+                title: "Flavors:".to_owned(),
+                options: vec1![
+                    "Vanilla".to_owned(),
+                    "Chocolate".to_owned(),
+                    "Strawberry".to_owned(),
+                    "Cinnamon".to_owned(),
+                    "Butterscotch".to_owned(),
+                    "Peanut Butter Fudge".to_owned(),
+                    "Chili".to_owned(),
+                ],
+                default: 0,
+            },
+        );
+        app.add(
+            "toppings",
+            Selector::Multi {
+                title: "Toppings:".to_owned(),
+                options: vec1![
+                    "Whipped Cream".to_owned(),
+                    "Hot Fudge".to_owned(),
+                    "Nuts".to_owned(),
+                    "Cherry".to_owned(),
+                    "Banana".to_owned(),
+                ],
+            },
+        );
+    }
     let selections = app.run();
     println!("{selections:#?}");
 }
