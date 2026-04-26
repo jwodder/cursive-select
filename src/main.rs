@@ -19,7 +19,7 @@ struct Curselect<T> {
     selectors: Vec<(T, Selector)>,
 }
 
-impl<T: Clone + Send + Sync + 'static> Curselect<T> {
+impl<T: 'static> Curselect<T> {
     fn new() -> Self {
         Curselect {
             selectors: Vec::new(),
