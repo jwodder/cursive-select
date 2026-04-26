@@ -264,6 +264,10 @@ impl<T: 'static> Curselect<T> {
                     }
                     DialogFocus::Button(_) => unreachable!(),
                 }
+            })
+            .on_event_inner(' ', |dialog, _| {
+                matches!(dialog.focus(), DialogFocus::Button(_))
+                    .then(|| dialog.on_event(Key::Enter.into()))
             }),
         );
         siv.run();
