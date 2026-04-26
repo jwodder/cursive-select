@@ -3,10 +3,30 @@
     - `z`, `Page Down` — go down a page
 - Support activating buttons with `Space`
 - Stylize selection list titles?
+    - Just make them bold?
 
 - `Selector::Single`: Handle `default` being out of range for `options`?
 - Allow setting a list/set of defaults for multi-selections?
 - Better handling of calling `run()` with no selection lists?
+    - Don't allow tabbing to the dialog content
+
+- Define separate `SingleSelector` and `MultiSelector` types that can be
+  converted `Into` `Selector`
+    - `SingleSelector` → `RadioSelector`?
+    - Support using any `S: AsRef<str>` when constructing selectors
+        - Or `Into<String>`?
+    - Give selectors `new(title: AsRef<str>, options: IntoIterator<Item:
+      AsRef<str>>) -> Self` constructors?
+        - If a selector has no options, ignore/don't render it?
+    - Give selectors methods for setting the default(s)
+    - Give selectors methods for getting the defaults that take care of
+      out-of-range values
+        - For `SingleSelector`, an out-of-range default is replaced with zero
+        - For `MultiSelector`, an out-of-range default is ignored
+
+- Make the examples output both the indices and labels for the selected
+  options?
+    - Show the raw return value if a `--debug` option is given?
 
 - Slight problem with scrolling: If you scroll to the bottom and then wrap
   around to the top, the first focusable item will be on top of the screen,
@@ -22,3 +42,7 @@
     - Use `Checkbox::labelled()`
     - Use `MultiChoiceGroup`?
         - cf. <https://github.com/gyscos/cursive/blob/main/cursive/examples/checkbox_multichoicegroup.rs>
+
+- Fill out README and put on GitHub?
+    - Rename to `cursive-select`?
+    - Rename `Curselect` to `Form`?
