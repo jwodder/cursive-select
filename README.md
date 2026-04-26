@@ -49,3 +49,6 @@ See Also
 
 - [`curselect`](https://github.com/jwodder/curselect), a roughly-equivalent
   implementation in Python made using the [urwid](https://urwid.org) library
+
+- [`ratselect`](https://github.com/jwodder/curselect), a roughly-equivalent
+  implementation in Rust made using the [Ratatui](https://ratatui.rs) library
