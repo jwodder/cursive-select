@@ -3,9 +3,7 @@
     - `z`, `Page Down` — go down a page
 
 - Rename `*Selector` to `Select`? `SelectList`?
-- Make the examples output both the indices and labels for the selected
-  options?
-    - Show the raw return value if a `--debug` option is given?
+- Create an example that sets multiple defaults for a `MultiSelector`
 
 - Slight problem with scrolling: If you scroll to the bottom and then wrap
   around to the top, the first focusable item will be on top of the screen,
