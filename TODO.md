@@ -20,5 +20,4 @@
         - cf. <https://github.com/gyscos/cursive/blob/main/cursive/examples/checkbox_multichoicegroup.rs>
 
 - Fill out README and put on GitHub?
-    - Determine accurate MSRV
     - Rename to `cursive-select`?

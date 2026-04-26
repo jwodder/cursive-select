@@ -2,7 +2,7 @@
 name = "cursivelect"
 version = "0.1.0-dev"
 edition = "2024"
-rust-version = "1.95"
+rust-version = "1.88"
 #description = ???
 authors = ["John Thorvald Wodder II <cursivelect@varonathe.org>"]
 repository = "https://github.com/jwodder/cursivelect"
