@@ -2,8 +2,6 @@
     - These currently move the scrollbar but don't change the focus:
         - `w`, `Page Up` — go up a page
         - `z`, `Page Down` — go down a page
-- `Tab` and `Shift`+`Tab` need to scroll the viewport so the now-focused item
-  is in view
 
 - Support activating buttons with `Space`
 - Stylize selection list titles?

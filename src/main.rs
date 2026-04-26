@@ -4,7 +4,7 @@ use cursive::{
     traits::Finder,
     view::Nameable,
     views::{
-        Checkbox, Dialog, DialogFocus, DummyView, LinearLayout, OnEventView, PaddedView,
+        Checkbox, Dialog, DialogFocus, DummyView, LinearLayout, NamedView, OnEventView, PaddedView,
         RadioGroup, ScrollView, TextView,
     },
 };
@@ -143,7 +143,7 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
         }
         siv.add_layer(
             OnEventView::new(
-                Dialog::around(ScrollView::new(layout.with_name("layout")))
+                Dialog::around(ScrollView::new(layout.with_name("layout")).with_name("scrollview"))
                     .button("OK", {
                         move |s| {
                             s.with_user_data(|st: &mut State<T>| {
@@ -178,8 +178,15 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                             }
                         }
                         false
-                    }) != Some(true)
+                    }) == Some(true)
                     {
+                        let _ = dialog.call_on_name(
+                            "scrollview",
+                            |scr: &mut ScrollView<NamedView<LinearLayout>>| {
+                                scr.scroll_to_important_area()
+                            },
+                        );
+                    } else {
                         dialog.set_focus(DialogFocus::Button(0));
                     }
                     Some(EventResult::Consumed(None))
@@ -210,8 +217,15 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                             }
                         }
                         false
-                    }) != Some(true)
+                    }) == Some(true)
                     {
+                        let _ = dialog.call_on_name(
+                            "scrollview",
+                            |scr: &mut ScrollView<NamedView<LinearLayout>>| {
+                                scr.scroll_to_important_area()
+                            },
+                        );
+                    } else {
                         dialog.set_focus(DialogFocus::Button(1));
                     }
                     Some(EventResult::Consumed(None))
