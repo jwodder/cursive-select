@@ -22,4 +22,3 @@
 - Fill out README and put on GitHub?
     - Determine accurate MSRV
     - Rename to `cursive-select`?
-    - Rename `Curselect` to `Form`?

@@ -1,4 +1,4 @@
-use cursivelect::{Curselect, MultiSelector, RadioSelector, Selection};
+use cursivelect::{Form, MultiSelector, RadioSelector, Selection};
 
 const EFFECTS: [&str; 9] = [
     "Bold",
@@ -17,7 +17,7 @@ const COLORS: [&str; 8] = [
 ];
 
 fn main() {
-    let mut app = Curselect::new();
+    let mut app = Form::new();
     app.add(
         "effects",
         MultiSelector::new("Effects:", EFFECTS).with_defaults([3, 7]),

@@ -1,4 +1,4 @@
-use cursivelect::{Curselect, MultiSelector, RadioSelector, Selection};
+use cursivelect::{Form, MultiSelector, RadioSelector, Selection};
 
 const LOREM: [&str; 7] = [
     "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod",
@@ -21,7 +21,7 @@ const IPSUM: [&str; 7] = [
 ];
 
 fn main() {
-    let mut app = Curselect::new();
+    let mut app = Form::new();
     app.add("lorem", RadioSelector::new("Lorem", LOREM));
     app.add("ipsum", MultiSelector::new("Ipsum", IPSUM));
     let selections = app.run();

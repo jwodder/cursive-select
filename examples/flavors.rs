@@ -1,4 +1,4 @@
-use cursivelect::{Curselect, MultiSelector, RadioSelector, Selection};
+use cursivelect::{Form, MultiSelector, RadioSelector, Selection};
 
 const FLAVORS: [&str; 7] = [
     "Vanilla",
@@ -13,7 +13,7 @@ const FLAVORS: [&str; 7] = [
 const TOPPINGS: [&str; 5] = ["Whipped Cream", "Hot Fudge", "Nuts", "Cherry", "Banana"];
 
 fn main() {
-    let mut app = Curselect::new();
+    let mut app = Form::new();
     app.add("flavor", RadioSelector::new("Flavors:", FLAVORS));
     app.add("toppings", MultiSelector::new("Toppings:", TOPPINGS));
     let selections = app.run();

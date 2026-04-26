@@ -12,16 +12,16 @@ full-screen terminal interface consisting of a series of *selection lists*
 
 Usage, in brief:
 
-- Create a new `Curselect`
+- Create a new `Form`
 
-- Call `curselect.add(list_key, selector)` with each `RadioSelector` or
+- Call `form.add(list_key, selector)` with each `RadioSelector` or
   `MultiSelector` you wish to present to the user
 
-- Call `curselect.run()` to run the interface and get the user's selections.
-  If the user cancelled/quit the interface, this method returns `None`;
-  otherwise, it returns `Some(selections)`, where `selections` is a `Vec<(T,
-  Selection)>` pairing the `list_key`'s supplied to `add()` with the choices
-  the user made for each respective selection list.
+- Call `form.run()` to run the interface and get the user's selections.  If the
+  user cancelled/quit the interface, this method returns `None`; otherwise, it
+  returns `Some(selections)`, where `selections` is a `Vec<(T, Selection)>`
+  pairing the `list_key`'s supplied to `add()` with the choices the user made
+  for the respective selection lists.
 
 The terminal interface supports the following keybindings:
 

@@ -1,4 +1,4 @@
-use cursivelect::{Curselect, RadioSelector, Selection};
+use cursivelect::{Form, RadioSelector, Selection};
 
 const WORDS: [&str; 26] = [
     "Abacus",
@@ -32,7 +32,7 @@ const WORDS: [&str; 26] = [
 const NUMBERS: [&str; 6] = ["Zero", "One", "Two", "Three", "Four", "Five"];
 
 fn main() {
-    let mut app = Curselect::new();
+    let mut app = Form::new();
     app.add("word", RadioSelector::new("Code Word:", WORDS));
     app.add(
         "number",

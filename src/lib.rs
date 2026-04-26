@@ -16,13 +16,13 @@ use std::collections::BTreeSet;
 const OPTION_INDENT: usize = 4;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Curselect<T> {
+pub struct Form<T> {
     selectors: Vec<(T, Selector)>,
 }
 
-impl<T: 'static> Curselect<T> {
+impl<T: 'static> Form<T> {
     pub fn new() -> Self {
-        Curselect {
+        Form {
             selectors: Vec::new(),
         }
     }
@@ -276,7 +276,7 @@ impl<T: 'static> Curselect<T> {
     }
 }
 
-impl<T: 'static> Default for Curselect<T> {
+impl<T: 'static> Default for Form<T> {
     fn default() -> Self {
         Self::new()
     }

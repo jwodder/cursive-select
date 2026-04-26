@@ -1,7 +1,7 @@
-use cursivelect::Curselect;
+use cursivelect::Form;
 
 fn main() {
-    let app = Curselect::<i32>::new();
+    let app = Form::<i32>::new();
     let selections = app.run();
     println!("{selections:#?}");
 }
