@@ -5,8 +5,6 @@
 
 - `Selector::Single`: Handle `default` being out of range for `options`?
 - Allow setting a list/set of defaults for multi-selections?
-- Better handling of calling `run()` with no selection lists?
-    - Don't allow tabbing to the dialog content
 
 - Define separate `SingleSelector` and `MultiSelector` types that can be
   converted `Into` `Selector`

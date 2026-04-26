@@ -33,6 +33,7 @@ impl<T: 'static> Curselect<T> {
     }
 
     pub fn run(self) -> Option<Vec<(T, Selection)>> {
+        let empty = self.selectors.is_empty();
         let mut outcome = Vec::with_capacity(self.selectors.len());
         let mut selectors = Vec::with_capacity(self.selectors.len());
         for (key, s) in self.selectors {
@@ -162,12 +163,15 @@ impl<T: 'static> Curselect<T> {
                     })
                     .button("Cancel", Cursive::quit),
             )
-            .on_pre_event_inner(Key::Home, |dialog, _| focus_top(dialog))
+            .on_pre_event_inner(
+                Key::Home,
+                move |dialog, _| if !empty { focus_top(dialog) } else { None },
+            )
             .on_pre_event_inner(Key::End, |dialog, _| {
                 dialog.set_focus(DialogFocus::Button(0));
                 Some(EventResult::Consumed(None))
             })
-            .on_pre_event_inner(Key::Tab, |dialog, _| match dialog.focus() {
+            .on_pre_event_inner(Key::Tab, move |dialog, _| match dialog.focus() {
                 DialogFocus::Content => {
                     if dialog.call_on_name("layout", |layout: &mut LinearLayout| {
                         for i in (layout.get_focus_index() + 1)..layout.len() {
@@ -203,47 +207,63 @@ impl<T: 'static> Curselect<T> {
                     dialog.set_focus(DialogFocus::Button(1));
                     Some(EventResult::Consumed(None))
                 }
-                DialogFocus::Button(1) => focus_top(dialog),
+                DialogFocus::Button(1) => {
+                    if empty {
+                        dialog.set_focus(DialogFocus::Button(0));
+                        Some(EventResult::Consumed(None))
+                    } else {
+                        focus_top(dialog)
+                    }
+                }
                 DialogFocus::Button(_) => unreachable!(),
             })
-            .on_pre_event_inner(Event::Shift(Key::Tab), |dialog, _| match dialog.focus() {
-                DialogFocus::Content => {
-                    if dialog.call_on_name("layout", |layout: &mut LinearLayout| {
-                        for i in (0..layout.get_focus_index()).rev() {
-                            if layout.set_focus_index(i).is_ok() {
-                                // Rather than trying to set the inner focus of
-                                // the just-focused view to its first element,
-                                // which is tricky, we just set the inner focus
-                                // of every options block.
-                                layout.call_on_all(
-                                    &cursive::view::Selector::Name("sublayout"),
-                                    |sublayout: &mut LinearLayout| {
-                                        let _ = sublayout.set_focus_index(0);
-                                    },
-                                );
-                                return true;
+            .on_pre_event_inner(Event::Shift(Key::Tab), move |dialog, _| {
+                match dialog.focus() {
+                    DialogFocus::Content => {
+                        if dialog.call_on_name("layout", |layout: &mut LinearLayout| {
+                            for i in (0..layout.get_focus_index()).rev() {
+                                if layout.set_focus_index(i).is_ok() {
+                                    // Rather than trying to set the inner focus of
+                                    // the just-focused view to its first element,
+                                    // which is tricky, we just set the inner focus
+                                    // of every options block.
+                                    layout.call_on_all(
+                                        &cursive::view::Selector::Name("sublayout"),
+                                        |sublayout: &mut LinearLayout| {
+                                            let _ = sublayout.set_focus_index(0);
+                                        },
+                                    );
+                                    return true;
+                                }
                             }
+                            false
+                        }) == Some(true)
+                        {
+                            let _ = dialog.call_on_name(
+                                "scrollview",
+                                |scr: &mut ScrollView<NamedView<LinearLayout>>| {
+                                    scr.scroll_to_important_area()
+                                },
+                            );
+                        } else {
+                            dialog.set_focus(DialogFocus::Button(1));
                         }
-                        false
-                    }) == Some(true)
-                    {
-                        let _ = dialog.call_on_name(
-                            "scrollview",
-                            |scr: &mut ScrollView<NamedView<LinearLayout>>| {
-                                scr.scroll_to_important_area()
-                            },
-                        );
-                    } else {
-                        dialog.set_focus(DialogFocus::Button(1));
+                        Some(EventResult::Consumed(None))
                     }
-                    Some(EventResult::Consumed(None))
+                    DialogFocus::Button(0) => {
+                        if empty {
+                            dialog.set_focus(DialogFocus::Button(1));
+                            Some(EventResult::Consumed(None))
+                        } else {
+                            focus_bottom(dialog)
+                        }
+                    }
+                    DialogFocus::Button(1) => {
+                        dialog.set_focus(DialogFocus::Button(0));
+                        Some(EventResult::Consumed(None))
+                    }
+                    DialogFocus::Button(_) => unreachable!(),
                 }
-                DialogFocus::Button(0) => focus_bottom(dialog),
-                DialogFocus::Button(1) => {
-                    dialog.set_focus(DialogFocus::Button(0));
-                    Some(EventResult::Consumed(None))
-                }
-                DialogFocus::Button(_) => unreachable!(),
             }),
         );
         siv.run();
