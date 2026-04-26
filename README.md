@@ -10,6 +10,8 @@ This is an experimental Rust library made using
 full-screen terminal interface consisting of a series of *selection lists*
 (radio buttons and sets of checkboxes) and capturing their choices.
 
+![Screenshot of the `flavors` example on startup](screenshots/flavors.png)
+
 Usage, in brief:
 
 - Create a new `Form`
