@@ -2,8 +2,6 @@
     - `w`, `Page Up` — go up a page
     - `z`, `Page Down` — go down a page
 - Support activating buttons with `Space`
-- Stylize selection list titles?
-    - Just make them bold?
 
 - `Selector::Single`: Handle `default` being out of range for `options`?
 - Allow setting a list/set of defaults for multi-selections?

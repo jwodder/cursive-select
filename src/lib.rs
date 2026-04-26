@@ -1,7 +1,9 @@
 use cursive::{
     Cursive, View,
     event::{Event, EventResult, Key},
+    style::Effect,
     traits::Finder,
+    utils::span::SpannedString,
     view::Nameable,
     views::{
         Checkbox, Dialog, DialogFocus, DummyView, LinearLayout, NamedView, OnEventView, PaddedView,
@@ -69,7 +71,13 @@ impl<T: 'static> Curselect<T> {
                     options,
                     default,
                 } => {
-                    layout.add_child(TextView::new(title));
+                    // Note that, on terminals which brighten bold text, the
+                    // title text will be "bright black," a shade of grey
+                    // rather than actual black.  This does not apply to
+                    // Terminal.app, as it seems to treat "\e[38;5;{index}m"
+                    // colors (which cursive uses) as different from the base 8
+                    // colors and thus doesn't brighten them.
+                    layout.add_child(TextView::new(SpannedString::styled(title, Effect::Bold)));
                     let mut group = RadioGroup::<usize>::new().on_change({
                         move |s, &radioed| {
                             s.with_user_data(|st: &mut State<T>| {
@@ -98,7 +106,7 @@ impl<T: 'static> Curselect<T> {
                     }
                 }
                 Selector::Multi { title, options } => {
-                    layout.add_child(TextView::new(title));
+                    layout.add_child(TextView::new(SpannedString::styled(title, Effect::Bold)));
                     for (i, opt) in options.iter().enumerate() {
                         let chkbox = Checkbox::new().on_change({
                             move |s, checked| {
