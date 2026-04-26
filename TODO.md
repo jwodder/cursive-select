@@ -1,7 +1,8 @@
 - These currently move the scrollbar but don't change the focus:
     - `w`, `Page Up` — go up a page
     - `z`, `Page Down` — go down a page
-- Rename `*Selector` to `Select`? `SelectList`?
+- Rename `*Selector` to `Select`? `SelectList`? `Selectable`?
+- Let the user select nothing for a `RadioSelector`?
 
 - Slight problem with scrolling: If you scroll to the bottom and then wrap
   around to the top, the first focusable item will be on top of the screen,
@@ -19,5 +20,6 @@
         - cf. <https://github.com/gyscos/cursive/blob/main/cursive/examples/checkbox_multichoicegroup.rs>
 
 - Fill out README and put on GitHub?
+    - Determine accurate MSRV
     - Rename to `cursive-select`?
     - Rename `Curselect` to `Form`?
