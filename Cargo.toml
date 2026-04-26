@@ -1,17 +1,13 @@
 [package]
-name = "cursivelect"
-version = "0.1.0-dev"
+name = "cursive-select"
 edition = "2024"
 rust-version = "1.88"
-#description = ???
-authors = ["John Thorvald Wodder II <cursivelect@varonathe.org>"]
-repository = "https://github.com/jwodder/cursivelect"
-documentation = "https://github.com/jwodder/cursivelect"
+description = "TUI selection list forms in Rust with cursive"
+authors = ["John Thorvald Wodder II <cursive-select@varonathe.org>"]
+repository = "https://github.com/jwodder/cursive-select"
+documentation = "https://github.com/jwodder/cursive-select"
 license = "MIT"
-keywords = []
-# See <https://crates.io/category_slugs> for a list of categories
-categories = []
-exclude = ["/.*"]
+publish = false
 
 [dependencies]
 cursive = "0.21.1"

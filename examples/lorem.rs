@@ -1,4 +1,4 @@
-use cursivelect::{Form, MultiSelector, RadioSelector, Selection};
+use cursive_select::{Form, MultiSelector, RadioSelector, Selection};
 
 const LOREM: [&str; 7] = [
     "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod",

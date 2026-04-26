@@ -1,4 +1,4 @@
-use cursivelect::{Form, RadioSelector, Selection};
+use cursive_select::{Form, RadioSelector, Selection};
 
 const WORDS: [&str; 26] = [
     "Abacus",

@@ -1,4 +1,4 @@
-use cursivelect::{Form, MultiSelector, RadioSelector, Selection};
+use cursive_select::{Form, MultiSelector, RadioSelector, Selection};
 
 const FLAVORS: [&str; 7] = [
     "Vanilla",

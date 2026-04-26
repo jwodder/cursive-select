@@ -125,6 +125,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursive-select"
+version = "0.0.0"
+dependencies = [
+ "cursive",
+ "itertools",
+]
+
+[[package]]
 name = "cursive_core"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -145,14 +153,6 @@ dependencies = [
  "unicode-segmentation",
  "unicode-width",
  "xi-unicode",
-]
-
-[[package]]
-name = "cursivelect"
-version = "0.1.0-dev"
-dependencies = [
- "cursive",
- "itertools",
 ]
 
 [[package]]

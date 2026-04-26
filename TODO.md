@@ -18,6 +18,3 @@
     - Use `Checkbox::labelled()`
     - Use `MultiChoiceGroup`?
         - cf. <https://github.com/gyscos/cursive/blob/main/cursive/examples/checkbox_multichoicegroup.rs>
-
-- Fill out README and put on GitHub?
-    - Rename to `cursive-select`?

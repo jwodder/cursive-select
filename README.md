@@ -1,9 +1,9 @@
 [![Project Status: Concept – Minimal or no implementation has been done yet, or the repository is only intended to be a limited example, demo, or proof-of-concept.](https://www.repostatus.org/badges/latest/concept.svg)](https://www.repostatus.org/#concept)
-[![CI Status](https://github.com/jwodder/cursivelect/actions/workflows/test.yml/badge.svg)](https://github.com/jwodder/cursivelect/actions/workflows/test.yml)
+[![CI Status](https://github.com/jwodder/cursive-select/actions/workflows/test.yml/badge.svg)](https://github.com/jwodder/cursive-select/actions/workflows/test.yml)
 [![Minimum Supported Rust Version](https://img.shields.io/badge/MSRV-1.88-orange)](https://www.rust-lang.org)
-[![MIT License](https://img.shields.io/github/license/jwodder/cursivelect.svg)](https://opensource.org/licenses/MIT)
+[![MIT License](https://img.shields.io/github/license/jwodder/cursive-select.svg)](https://opensource.org/licenses/MIT)
 
-[GitHub](https://github.com/jwodder/cursivelect) | [Issues](https://github.com/jwodder/cursivelect/issues)
+[GitHub](https://github.com/jwodder/cursive-select) | [Issues](https://github.com/jwodder/cursive-select/issues)
 
 This is an experimental Rust library made using
 [`cursive`](https://crates.io/crates/cursive) for presenting a user with a

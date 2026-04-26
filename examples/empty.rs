@@ -1,4 +1,4 @@
-use cursivelect::Form;
+use cursive_select::Form;
 
 fn main() {
     let app = Form::<i32>::new();
