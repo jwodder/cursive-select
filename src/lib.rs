@@ -9,28 +9,28 @@ use cursive::{
     },
 };
 use itertools::{Itertools, Position};
-use mitsein::vec1::{Vec1, vec1};
+use mitsein::vec1::Vec1;
 use std::collections::BTreeSet;
 
 const OPTION_INDENT: usize = 4;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-struct Curselect<T> {
+pub struct Curselect<T> {
     selectors: Vec<(T, Selector)>,
 }
 
 impl<T: 'static> Curselect<T> {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Curselect {
             selectors: Vec::new(),
         }
     }
 
-    fn add(&mut self, key: T, selector: Selector) {
+    pub fn add(&mut self, key: T, selector: Selector) {
         self.selectors.push((key, selector));
     }
 
-    fn run(self) -> Option<Vec<(T, Selection)>> {
+    pub fn run(self) -> Option<Vec<(T, Selection)>> {
         let mut outcome = Vec::with_capacity(self.selectors.len());
         let mut selectors = Vec::with_capacity(self.selectors.len());
         for (key, s) in self.selectors {
@@ -247,6 +247,37 @@ impl<T: 'static> Curselect<T> {
     }
 }
 
+impl<T: 'static> Default for Curselect<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct State<T> {
+    outcome: Vec<(T, Selection)>,
+    ok: bool,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum Selector {
+    Single {
+        title: String,
+        options: Vec1<String>,
+        default: usize,
+    },
+    Multi {
+        title: String,
+        options: Vec1<String>,
+    },
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum Selection {
+    Single(usize),
+    Multi(BTreeSet<usize>),
+}
+
 #[allow(clippy::unnecessary_wraps)]
 fn focus_top(dialog: &mut Dialog) -> Option<EventResult> {
     dialog.set_focus(DialogFocus::Content);
@@ -285,151 +316,4 @@ fn focus_bottom(dialog: &mut Dialog) -> Option<EventResult> {
         None
     };
     Some(EventResult::Consumed(cb))
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-struct State<T> {
-    outcome: Vec<(T, Selection)>,
-    ok: bool,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-enum Selector {
-    Single {
-        title: String,
-        options: Vec1<String>,
-        default: usize,
-    },
-    Multi {
-        title: String,
-        options: Vec1<String>,
-    },
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-enum Selection {
-    Single(usize),
-    Multi(BTreeSet<usize>),
-}
-
-fn main() {
-    let mut app = Curselect::new();
-    let arg = std::env::args_os().nth(1);
-    let arg = arg.as_ref();
-    if arg.is_some_and(|s| s == "full") {
-        app.add(
-            "word",
-            Selector::Single {
-                title: "Code Word:".into(),
-                options: vec1![
-                    "Abacus".into(),
-                    "Banana".into(),
-                    "Coconut".into()
-                    "Delta".into(),
-                    "Exotic".into(),
-                    "Finagle".into(),
-                    "Geranium".into(),
-                    "Heliopause".into(),
-                    "Indigo".into(),
-                    "Justice".into(),
-                    "Kangaroo".into(),
-                    "Lemon".into(),
-                    "Mausoleum".into(),
-                    "Nocturnal".into(),
-                    "Occupation".into(),
-                    "Philosophy".into(),
-                    "Quux".into(),
-                    "Radius".into(),
-                    "Service".into(),
-                    "Tuxedo".into(),
-                    "Universe".into(),
-                    "Vulpine".into(),
-                    "Wolpertinger".into(),
-                    "Xylem".into(),
-                    "Yellow".into(),
-                    "Zyzzyva".into(),
-                ],
-                default: 0,
-            },
-        );
-        app.add(
-            "number",
-            Selector::Single {
-                title: "Code Number:".into(),
-                options: vec1![
-                    "Zero (0)".into(),
-                    "One (1)".into(),
-                    "Two (2)".into(),
-                    "Three (3)".into(),
-                    "Four (4)".into(),
-                    "Five (5)".into(),
-                ],
-                default: 5,
-            },
-        );
-    } else if arg.is_some_and(|s| s == "lorem") {
-        app.add(
-            "lorem",
-            Selector::Single {
-                title: "Lorem".to_owned(),
-                options: vec1![
-                    "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod".into(),
-                    "tincidunt ut laoreet dolore magna aliquam erat volutpat.  Ut wisi enim ad minim veniam,".into(),
-                    "quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo".into(),
-                    "consequat.  Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse".into(),
-                    "molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan".into(),
-                    "et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore".into(),
-                    "te feugait nulla facilisi.  Nam liber tempor cum soluta nobis eleifend option congue".into(),
-                ],
-                default: 0,
-            }
-        );
-        app.add("ipsum",
-            Selector::Multi {
-                title: "Ipsum".to_owned(),
-                options: vec1![
-                    "nihil imperdiet doming id quod mazim placerat facer possim assum.  Typi non habent".into(),
-                    "claritatem insitam; est usus legentis in iis qui facit eorum claritatem.  Investigationes".into(),
-                    "demonstraverunt lectores legere me lius quod ii legunt saepius.  Claritas est etiam".into(),
-                    "processus dynamicus, qui sequitur mutationem consuetudium lectorum.  Mirum est notare".into(),
-                    "quam littera gothica, quam nunc putamus parum claram, anteposuerit litterarum formas".into(),
-                    "humanitatis per seacula quarta decima et quinta decima.  Eodem modo typi, qui nunc".into(),
-                    "nobis videntur parum clari, fiant sollemnes in futurum.".into(),
-                ],
-            }
-        );
-    } else if arg.is_some_and(|s| s == "empty") {
-    } else {
-        app.add(
-            "flavor",
-            Selector::Single {
-                title: "Flavors:".to_owned(),
-                options: vec1![
-                    "Vanilla".to_owned(),
-                    "Chocolate".to_owned(),
-                    "Strawberry".to_owned(),
-                    "Cinnamon".to_owned(),
-                    "Butterscotch".to_owned(),
-                    "Peanut Butter Fudge".to_owned(),
-                    "Chili".to_owned(),
-                ],
-                default: 0,
-            },
-        );
-        app.add(
-            "toppings",
-            Selector::Multi {
-                title: "Toppings:".to_owned(),
-                options: vec1![
-                    "Whipped Cream".to_owned(),
-                    "Hot Fudge".to_owned(),
-                    "Nuts".to_owned(),
-                    "Cherry".to_owned(),
-                    "Banana".to_owned(),
-                ],
-            },
-        );
-    }
-    let selections = app.run();
-    println!("{selections:#?}");
 }
