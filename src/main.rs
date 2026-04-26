@@ -1,12 +1,14 @@
 use cursive::{
     Cursive, View,
-    event::{EventResult, Key},
+    event::{Event, EventResult, Key},
+    traits::Finder,
     view::Nameable,
     views::{
         Checkbox, Dialog, DialogFocus, DummyView, LinearLayout, OnEventView, PaddedView,
         RadioGroup, ScrollView, TextView,
     },
 };
+use itertools::{Itertools, Position};
 use mitsein::vec1::{Vec1, vec1};
 use std::collections::BTreeSet;
 
@@ -56,10 +58,11 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
         siv.add_global_callback('g', |s| s.on_event(Key::Home.into()));
         siv.add_global_callback('G', |s| s.on_event(Key::End.into()));
         let mut layout = LinearLayout::vertical();
-        for (si, sel) in selectors.iter().enumerate() {
+        for (pos, (si, sel)) in selectors.into_iter().enumerate().with_position() {
             if si > 0 {
                 layout.add_child(DummyView);
             }
+            let mut sublayout = LinearLayout::vertical();
             match sel {
                 Selector::Single {
                     title,
@@ -74,23 +77,28 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                             });
                         }
                     });
-                    let mut sublayout = LinearLayout::vertical();
-                    for (i, opt) in options.iter().enumerate() {
+                    for (i, opt) in options.into_iter().enumerate() {
                         let mut button = group.button(i, opt);
-                        if i == *default {
+                        if i == default {
                             let _ = button.select();
                         }
-                        if si == 0 && i == 0 {
-                            sublayout.add_child(button.with_name("top"));
+                        if i == 0 {
+                            match pos {
+                                Position::Only => sublayout
+                                    .add_child(button.with_name("top").with_name("bottom-target")),
+                                Position::First => sublayout.add_child(button.with_name("top")),
+                                Position::Last => {
+                                    sublayout.add_child(button.with_name("bottom-target"));
+                                }
+                                Position::Middle => sublayout.add_child(button),
+                            }
                         } else {
                             sublayout.add_child(button);
                         }
                     }
-                    layout.add_child(PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout));
                 }
                 Selector::Multi { title, options } => {
                     layout.add_child(TextView::new(title));
-                    let mut sublayout = LinearLayout::vertical();
                     for (i, opt) in options.iter().enumerate() {
                         let chkbox = Checkbox::new().on_change({
                             move |s, checked| {
@@ -107,30 +115,35 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                                 });
                             }
                         });
-                        let lbl = TextView::new(opt);
-                        if si == 0 && i == 0 {
-                            sublayout.add_child(
-                                LinearLayout::horizontal()
-                                    .child(chkbox.with_name("top"))
-                                    .child(DummyView)
-                                    .child(lbl),
-                            );
+                        let mut row = LinearLayout::horizontal();
+                        if i == 0 {
+                            match pos {
+                                Position::Only => row
+                                    .add_child(chkbox.with_name("top").with_name("bottom-target")),
+                                Position::First => row.add_child(chkbox.with_name("top")),
+                                Position::Last => row.add_child(chkbox.with_name("bottom-target")),
+                                Position::Middle => row.add_child(chkbox),
+                            }
                         } else {
-                            sublayout.add_child(
-                                LinearLayout::horizontal()
-                                    .child(chkbox)
-                                    .child(DummyView)
-                                    .child(lbl),
-                            );
+                            row.add_child(chkbox);
                         }
+                        row.add_child(DummyView);
+                        row.add_child(TextView::new(opt));
+                        sublayout.add_child(row);
                     }
-                    layout.add_child(PaddedView::lrtb(OPTION_INDENT, 0, 0, 0, sublayout));
                 }
             }
+            layout.add_child(PaddedView::lrtb(
+                OPTION_INDENT,
+                0,
+                0,
+                0,
+                sublayout.with_name("sublayout"),
+            ));
         }
         siv.add_layer(
             OnEventView::new(
-                Dialog::around(ScrollView::new(layout))
+                Dialog::around(ScrollView::new(layout.with_name("layout")))
                     .button("OK", {
                         move |s| {
                             s.with_user_data(|st: &mut State<T>| {
@@ -141,27 +154,74 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
                     })
                     .button("Cancel", Cursive::quit),
             )
-            .on_pre_event_inner(Key::Home, |dialog, _| {
-                dialog.set_focus(DialogFocus::Content);
-                if let Some(scroller) = dialog
-                    .get_content_mut()
-                    .as_any_mut()
-                    .downcast_mut::<ScrollView<LinearLayout>>()
-                {
-                    scroller.scroll_to_top();
-                }
-                let cb = if let Ok(EventResult::Consumed(val)) =
-                    dialog.focus_view(&cursive::view::Selector::Name("top"))
-                {
-                    val
-                } else {
-                    None
-                };
-                Some(EventResult::Consumed(cb))
-            })
+            .on_pre_event_inner(Key::Home, |dialog, _| focus_top(dialog))
             .on_pre_event_inner(Key::End, |dialog, _| {
                 dialog.set_focus(DialogFocus::Button(0));
                 Some(EventResult::Consumed(None))
+            })
+            .on_pre_event_inner(Key::Tab, |dialog, _| match dialog.focus() {
+                DialogFocus::Content => {
+                    if dialog.call_on_name("layout", |layout: &mut LinearLayout| {
+                        for i in (layout.get_focus_index() + 1)..layout.len() {
+                            if layout.set_focus_index(i).is_ok() {
+                                // Rather than trying to set the inner focus of
+                                // the just-focused view to its first element,
+                                // which is tricky, we just set the inner focus
+                                // of every options block.
+                                layout.call_on_all(
+                                    &cursive::view::Selector::Name("sublayout"),
+                                    |sublayout: &mut LinearLayout| {
+                                        let _ = sublayout.set_focus_index(0);
+                                    },
+                                );
+                                return true;
+                            }
+                        }
+                        false
+                    }) != Some(true)
+                    {
+                        dialog.set_focus(DialogFocus::Button(0));
+                    }
+                    Some(EventResult::Consumed(None))
+                }
+                DialogFocus::Button(0) => {
+                    dialog.set_focus(DialogFocus::Button(1));
+                    Some(EventResult::Consumed(None))
+                }
+                DialogFocus::Button(1) => focus_top(dialog),
+                DialogFocus::Button(_) => unreachable!(),
+            })
+            .on_pre_event_inner(Event::Shift(Key::Tab), |dialog, _| match dialog.focus() {
+                DialogFocus::Content => {
+                    if dialog.call_on_name("layout", |layout: &mut LinearLayout| {
+                        for i in (0..layout.get_focus_index()).rev() {
+                            if layout.set_focus_index(i).is_ok() {
+                                // Rather than trying to set the inner focus of
+                                // the just-focused view to its first element,
+                                // which is tricky, we just set the inner focus
+                                // of every options block.
+                                layout.call_on_all(
+                                    &cursive::view::Selector::Name("sublayout"),
+                                    |sublayout: &mut LinearLayout| {
+                                        let _ = sublayout.set_focus_index(0);
+                                    },
+                                );
+                                return true;
+                            }
+                        }
+                        false
+                    }) != Some(true)
+                    {
+                        dialog.set_focus(DialogFocus::Button(1));
+                    }
+                    Some(EventResult::Consumed(None))
+                }
+                DialogFocus::Button(0) => focus_bottom(dialog),
+                DialogFocus::Button(1) => {
+                    dialog.set_focus(DialogFocus::Button(0));
+                    Some(EventResult::Consumed(None))
+                }
+                DialogFocus::Button(_) => unreachable!(),
             }),
         );
         siv.run();
@@ -171,6 +231,46 @@ impl<T: Clone + Send + Sync + 'static> Curselect<T> {
             None => panic!("Could not get user data back"),
         }
     }
+}
+
+#[allow(clippy::unnecessary_wraps)]
+fn focus_top(dialog: &mut Dialog) -> Option<EventResult> {
+    dialog.set_focus(DialogFocus::Content);
+    if let Some(scroller) = dialog
+        .get_content_mut()
+        .as_any_mut()
+        .downcast_mut::<ScrollView<LinearLayout>>()
+    {
+        scroller.scroll_to_top();
+    }
+    let cb = if let Ok(EventResult::Consumed(val)) =
+        dialog.focus_view(&cursive::view::Selector::Name("top"))
+    {
+        val
+    } else {
+        None
+    };
+    Some(EventResult::Consumed(cb))
+}
+
+#[allow(clippy::unnecessary_wraps)]
+fn focus_bottom(dialog: &mut Dialog) -> Option<EventResult> {
+    dialog.set_focus(DialogFocus::Content);
+    if let Some(scroller) = dialog
+        .get_content_mut()
+        .as_any_mut()
+        .downcast_mut::<ScrollView<LinearLayout>>()
+    {
+        scroller.scroll_to_bottom();
+    }
+    let cb = if let Ok(EventResult::Consumed(val)) =
+        dialog.focus_view(&cursive::view::Selector::Name("bottom-target"))
+    {
+        val
+    } else {
+        None
+    };
+    Some(EventResult::Consumed(cb))
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

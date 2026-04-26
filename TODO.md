@@ -2,8 +2,10 @@
     - These currently move the scrollbar but don't change the focus:
         - `w`, `Page Up` — go up a page
         - `z`, `Page Down` — go down a page
-    - `Tab` — go to next selection list
-    - `Shift`+`Tab` — go to previous selection list
+- `Tab` and `Shift`+`Tab` need to scroll the viewport so the now-focused item
+  is in view
+
+- Support activating buttons with `Space`
 - Stylize selection list titles?
 
 - `Selector::Single`: Handle `default` being out of range for `options`?

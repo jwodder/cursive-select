@@ -152,6 +152,7 @@ name = "cursivelect"
 version = "0.1.0-dev"
 dependencies = [
  "cursive",
+ "itertools",
  "mitsein",
 ]
 
