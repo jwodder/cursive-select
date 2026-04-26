@@ -1,57 +1,55 @@
-use cursivelect::{Curselect, Selector};
-use mitsein::vec1::vec1;
+use cursivelect::{Curselect, RadioSelector};
 
 fn main() {
     let mut app = Curselect::new();
     app.add(
         "word",
-        Selector::Single {
-            title: "Code Word:".into(),
-            options: vec1![
-                "Abacus".into(),
-                "Banana".into(),
-                "Coconut".into()
-                "Delta".into(),
-                "Exotic".into(),
-                "Finagle".into(),
-                "Geranium".into(),
-                "Heliopause".into(),
-                "Indigo".into(),
-                "Justice".into(),
-                "Kangaroo".into(),
-                "Lemon".into(),
-                "Mausoleum".into(),
-                "Nocturnal".into(),
-                "Occupation".into(),
-                "Philosophy".into(),
-                "Quux".into(),
-                "Radius".into(),
-                "Service".into(),
-                "Tuxedo".into(),
-                "Universe".into(),
-                "Vulpine".into(),
-                "Wolpertinger".into(),
-                "Xylem".into(),
-                "Yellow".into(),
-                "Zyzzyva".into(),
+        RadioSelector::new(
+            "Code Word:",
+            [
+                "Abacus",
+                "Banana",
+                "Coconut",
+                "Delta",
+                "Exotic",
+                "Finagle",
+                "Geranium",
+                "Heliopause",
+                "Indigo",
+                "Justice",
+                "Kangaroo",
+                "Lemon",
+                "Mausoleum",
+                "Nocturnal",
+                "Occupation",
+                "Philosophy",
+                "Quux",
+                "Radius",
+                "Service",
+                "Tuxedo",
+                "Universe",
+                "Vulpine",
+                "Wolpertinger",
+                "Xylem",
+                "Yellow",
+                "Zyzzyva",
             ],
-            default: 0,
-        },
+        ),
     );
     app.add(
         "number",
-        Selector::Single {
-            title: "Code Number:".into(),
-            options: vec1![
-                "Zero (0)".into(),
-                "One (1)".into(),
-                "Two (2)".into(),
-                "Three (3)".into(),
-                "Four (4)".into(),
-                "Five (5)".into(),
+        RadioSelector::new(
+            "Code Number:",
+            [
+                "Zero (0)",
+                "One (1)",
+                "Two (2)",
+                "Three (3)",
+                "Four (4)",
+                "Five (5)",
             ],
-            default: 5,
-        },
+        )
+        .with_default(5),
     );
     let selections = app.run();
     println!("{selections:#?}");

@@ -1,36 +1,28 @@
-use cursivelect::{Curselect, Selector};
-use mitsein::vec1::vec1;
+use cursivelect::{Curselect, MultiSelector, RadioSelector};
 
 fn main() {
     let mut app = Curselect::new();
     app.add(
         "flavor",
-        Selector::Single {
-            title: "Flavors:".to_owned(),
-            options: vec1![
-                "Vanilla".to_owned(),
-                "Chocolate".to_owned(),
-                "Strawberry".to_owned(),
-                "Cinnamon".to_owned(),
-                "Butterscotch".to_owned(),
-                "Peanut Butter Fudge".to_owned(),
-                "Chili".to_owned(),
+        RadioSelector::new(
+            "Flavors:",
+            [
+                "Vanilla",
+                "Chocolate",
+                "Strawberry",
+                "Cinnamon",
+                "Butterscotch",
+                "Peanut Butter Fudge",
+                "Chili",
             ],
-            default: 0,
-        },
+        ),
     );
     app.add(
         "toppings",
-        Selector::Multi {
-            title: "Toppings:".to_owned(),
-            options: vec1![
-                "Whipped Cream".to_owned(),
-                "Hot Fudge".to_owned(),
-                "Nuts".to_owned(),
-                "Cherry".to_owned(),
-                "Banana".to_owned(),
-            ],
-        },
+        MultiSelector::new(
+            "Toppings:",
+            ["Whipped Cream", "Hot Fudge", "Nuts", "Cherry", "Banana"],
+        ),
     );
     let selections = app.run();
     println!("{selections:#?}");

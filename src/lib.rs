@@ -11,7 +11,6 @@ use cursive::{
     },
 };
 use itertools::{Itertools, Position};
-use mitsein::vec1::Vec1;
 use std::collections::BTreeSet;
 
 const OPTION_INDENT: usize = 4;
@@ -28,22 +27,20 @@ impl<T: 'static> Curselect<T> {
         }
     }
 
-    pub fn add(&mut self, key: T, selector: Selector) {
-        self.selectors.push((key, selector));
+    pub fn add<S: Into<Selector>>(&mut self, key: T, selector: S) {
+        self.selectors.push((key, selector.into()));
     }
 
     pub fn run(self) -> Option<Vec<(T, Selection)>> {
-        let empty = self.selectors.is_empty();
         let mut outcome = Vec::with_capacity(self.selectors.len());
         let mut selectors = Vec::with_capacity(self.selectors.len());
         for (key, s) in self.selectors {
-            let keyout = match &s {
-                Selector::Single { default, .. } => Selection::Single(*default),
-                Selector::Multi { .. } => Selection::Multi(BTreeSet::new()),
-            };
-            outcome.push((key, keyout));
-            selectors.push(s);
+            if !s.is_empty() {
+                outcome.push((key, s.default_selection()));
+                selectors.push(s);
+            }
         }
+        let empty = selectors.is_empty();
         let mut siv = cursive::default();
         siv.set_user_data(State { outcome, ok: false });
         siv.with_theme(|theme| {
@@ -66,29 +63,27 @@ impl<T: 'static> Curselect<T> {
                 layout.add_child(DummyView);
             }
             let mut sublayout = LinearLayout::vertical();
+            // Note that, on terminals which brighten bold text, the title text
+            // will be "bright black," a shade of grey rather than actual
+            // black.  This does not apply to Terminal.app, as it seems to
+            // treat "\e[38;5;{index}m" colors (which cursive uses) as
+            // different from the base 8 colors and thus doesn't brighten them.
+            layout.add_child(TextView::new(SpannedString::styled(
+                sel.title(),
+                Effect::Bold,
+            )));
             match sel {
-                Selector::Single {
-                    title,
-                    options,
-                    default,
-                } => {
-                    // Note that, on terminals which brighten bold text, the
-                    // title text will be "bright black," a shade of grey
-                    // rather than actual black.  This does not apply to
-                    // Terminal.app, as it seems to treat "\e[38;5;{index}m"
-                    // colors (which cursive uses) as different from the base 8
-                    // colors and thus doesn't brighten them.
-                    layout.add_child(TextView::new(SpannedString::styled(title, Effect::Bold)));
+                Selector::Radio(rs) => {
                     let mut group = RadioGroup::<usize>::new().on_change({
                         move |s, &radioed| {
                             s.with_user_data(|st: &mut State<T>| {
-                                st.outcome[si].1 = Selection::Single(radioed);
+                                st.outcome[si].1 = Selection::Radio(radioed);
                             });
                         }
                     });
-                    for (i, opt) in options.into_iter().enumerate() {
+                    for (i, (checked, opt)) in rs.into_checked_options().enumerate() {
                         let mut button = group.button(i, opt);
-                        if i == default {
+                        if checked {
                             let _ = button.select();
                         }
                         if i == 0 {
@@ -106,17 +101,16 @@ impl<T: 'static> Curselect<T> {
                         }
                     }
                 }
-                Selector::Multi { title, options } => {
-                    layout.add_child(TextView::new(SpannedString::styled(title, Effect::Bold)));
-                    for (i, opt) in options.iter().enumerate() {
-                        let chkbox = Checkbox::new().on_change({
-                            move |s, checked| {
+                Selector::Multi(ms) => {
+                    for (i, (checked, opt)) in ms.into_checked_options().enumerate() {
+                        let mut chkbox = Checkbox::new().on_change({
+                            move |s, checking| {
                                 s.with_user_data(|st: &mut State<T>| {
                                     let Selection::Multi(ref mut selection) = st.outcome[si].1
                                     else {
                                         unreachable!();
                                     };
-                                    if checked {
+                                    if checking {
                                         selection.insert(i);
                                     } else {
                                         selection.remove(&i);
@@ -124,6 +118,9 @@ impl<T: 'static> Curselect<T> {
                                 });
                             }
                         });
+                        if checked {
+                            let _ = chkbox.check();
+                        }
                         let mut row = LinearLayout::horizontal();
                         if i == 0 {
                             match pos {
@@ -293,20 +290,136 @@ struct State<T> {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Selector {
-    Single {
-        title: String,
-        options: Vec1<String>,
-        default: usize,
-    },
-    Multi {
-        title: String,
-        options: Vec1<String>,
-    },
+    Radio(RadioSelector),
+    Multi(MultiSelector),
+}
+
+impl Selector {
+    fn title(&self) -> &str {
+        match self {
+            Selector::Radio(s) => &s.title,
+            Selector::Multi(s) => &s.title,
+        }
+    }
+
+    fn default_selection(&self) -> Selection {
+        match self {
+            Selector::Radio(s) => s.default_selection(),
+            Selector::Multi(s) => s.default_selection(),
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        match self {
+            Selector::Radio(s) => s.is_empty(),
+            Selector::Multi(s) => s.is_empty(),
+        }
+    }
+}
+
+impl From<RadioSelector> for Selector {
+    fn from(value: RadioSelector) -> Selector {
+        Selector::Radio(value)
+    }
+}
+
+impl From<MultiSelector> for Selector {
+    fn from(value: MultiSelector) -> Selector {
+        Selector::Multi(value)
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RadioSelector {
+    title: String,
+    options: Vec<String>,
+    default: usize,
+}
+
+impl RadioSelector {
+    pub fn new<S, I>(title: S, options: I) -> RadioSelector
+    where
+        S: Into<String>,
+        I: IntoIterator<Item: Into<String>>,
+    {
+        RadioSelector {
+            title: title.into(),
+            options: options.into_iter().map(Into::into).collect(),
+            default: 0,
+        }
+    }
+
+    pub fn with_default(mut self, mut default: usize) -> RadioSelector {
+        if default >= self.options.len() {
+            default = 0;
+        }
+        self.default = default;
+        self
+    }
+
+    fn default_selection(&self) -> Selection {
+        Selection::Radio(self.default)
+    }
+
+    fn into_checked_options(self) -> impl Iterator<Item = (bool, String)> {
+        self.options
+            .into_iter()
+            .enumerate()
+            .map(move |(i, s)| (i == self.default, s))
+    }
+
+    fn is_empty(&self) -> bool {
+        self.options.is_empty()
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MultiSelector {
+    title: String,
+    options: Vec<String>,
+    defaults: BTreeSet<usize>,
+}
+
+impl MultiSelector {
+    pub fn new<S, I>(title: S, options: I) -> MultiSelector
+    where
+        S: Into<String>,
+        I: IntoIterator<Item: Into<String>>,
+    {
+        MultiSelector {
+            title: title.into(),
+            options: options.into_iter().map(Into::into).collect(),
+            defaults: BTreeSet::new(),
+        }
+    }
+
+    pub fn with_defaults<I: IntoIterator<Item = usize>>(mut self, defaults: I) -> MultiSelector {
+        self.defaults = defaults
+            .into_iter()
+            .filter(|&i| i < self.options.len())
+            .collect();
+        self
+    }
+
+    fn default_selection(&self) -> Selection {
+        Selection::Multi(self.defaults.clone())
+    }
+
+    fn into_checked_options(self) -> impl Iterator<Item = (bool, String)> {
+        self.options
+            .into_iter()
+            .enumerate()
+            .map(move |(i, s)| (self.defaults.contains(&i), s))
+    }
+
+    fn is_empty(&self) -> bool {
+        self.options.is_empty()
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Selection {
-    Single(usize),
+    Radio(usize),
     Multi(BTreeSet<usize>),
 }
 

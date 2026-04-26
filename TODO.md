@@ -2,23 +2,7 @@
     - `w`, `Page Up` — go up a page
     - `z`, `Page Down` — go down a page
 
-- `Selector::Single`: Handle `default` being out of range for `options`?
-- Allow setting a list/set of defaults for multi-selections?
-
-- Define separate `SingleSelector` and `MultiSelector` types that can be
-  converted `Into` `Selector`
-    - `SingleSelector` → `RadioSelector`?
-    - Support using any `S: AsRef<str>` when constructing selectors
-        - Or `Into<String>`?
-    - Give selectors `new(title: AsRef<str>, options: IntoIterator<Item:
-      AsRef<str>>) -> Self` constructors?
-        - If a selector has no options, ignore/don't render it?
-    - Give selectors methods for setting the default(s)
-    - Give selectors methods for getting the defaults that take care of
-      out-of-range values
-        - For `SingleSelector`, an out-of-range default is replaced with zero
-        - For `MultiSelector`, an out-of-range default is ignored
-
+- Rename `*Selector` to `Select`? `SelectList`?
 - Make the examples output both the indices and labels for the selected
   options?
     - Show the raw return value if a `--debug` option is given?
